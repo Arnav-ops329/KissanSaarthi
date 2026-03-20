@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
 class AIChatScreen extends StatefulWidget {
+  const AIChatScreen({super.key});
+
   @override
-  _AIChatScreenState createState() => _AIChatScreenState();
+  State<AIChatScreen> createState() => _AIChatScreenState();
 }
 
 class _AIChatScreenState extends State<AIChatScreen> {
@@ -26,19 +28,19 @@ class _AIChatScreenState extends State<AIChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("AI Farming Assistant")),
+      appBar: AppBar(title: const Text("AI Farming Assistant")),
 
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
 
         children: [
-          Text(text, style: TextStyle(fontSize: 20)),
+          Text(text, style: const TextStyle(fontSize: 20)),
 
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
 
           FloatingActionButton(
-            child: Icon(Icons.mic),
             onPressed: startListening,
+            child: const Icon(Icons.mic),
           ),
         ],
       ),

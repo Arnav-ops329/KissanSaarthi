@@ -23,6 +23,10 @@ dependencies:
   tflite_flutter: ^0.12.1
   provider: ^6.0.5
   geolocator: ^10.1.0
+  http_parser: ^4.0.2
+  image: ^4.2.0
+  path_provider: ^2.1.5
+  onnxruntime_v2: ^1.23.2+2
  
 
 dev_dependencies:
@@ -40,3 +44,5 @@ flutter:
     - assets/Tractor2.png
     - localization/en.json
     - localization/hi.json
+    - assets/models/best.onnx
+    - assets/models/labels.txt

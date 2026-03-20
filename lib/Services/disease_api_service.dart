@@ -1,7 +1,10 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
+/// NOTE: This service is dedicated to ONLINE disease detection via a remote API.
+/// For OFFLINE detection using the built-in YOLO model, see [YoloOfflineService].
 class DiseaseApiService {
   static const String apiUrl =
       "https://kissan-saarthi-api.onrender.com/predict";
@@ -27,15 +30,16 @@ class DiseaseApiService {
         ),
       );
 
-      print("Sending request to API...");
+      debugPrint("Sending request to: ${Uri.parse(apiUrl)}");
+      debugPrint("Headers: ${request.headers}");
 
       var response = await request.send();
 
-      print("STATUS CODE: ${response.statusCode}");
+      debugPrint("STATUS CODE: ${response.statusCode} for ${response.request?.url}");
 
       var responseBody = await response.stream.bytesToString();
 
-      print("SERVER RESPONSE: $responseBody");
+      debugPrint("SERVER RESPONSE: $responseBody");
 
       if (response.statusCode == 200) {
         return json.decode(responseBody);
@@ -47,7 +51,7 @@ class DiseaseApiService {
         };
       }
     } catch (e) {
-      print("ERROR: $e");
+      debugPrint("ERROR: $e");
 
       return {
         "disease": "Connection Error",

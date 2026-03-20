@@ -24,7 +24,7 @@ class AppProvider extends ChangeNotifier {
     try {
       cropPrices = await MarketPriceService.fetchPrices(crop);
     } catch (e) {
-      print("Error fetching prices: $e");
+      debugPrint("Error fetching prices: $e");
     }
 
     isLoadingPrices = false;

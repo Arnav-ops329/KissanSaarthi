@@ -3,8 +3,10 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 
 class MarketScreen extends StatefulWidget {
+  const MarketScreen({super.key});
+
   @override
-  _MarketScreenState createState() => _MarketScreenState();
+  State<MarketScreen> createState() => _MarketScreenState();
 }
 
 class _MarketScreenState extends State<MarketScreen> {
@@ -14,8 +16,10 @@ class _MarketScreenState extends State<MarketScreen> {
   void initState() {
     super.initState();
 
-    Future.microtask(() => Provider.of<AppProvider>(context, listen: false)
-        .loadCropPrices("Wheat"));
+    Future.microtask(() {
+      if (!mounted) return;
+      Provider.of<AppProvider>(context, listen: false).loadCropPrices("Wheat");
+    });
   }
 
   @override
@@ -23,15 +27,15 @@ class _MarketScreenState extends State<MarketScreen> {
     final provider = Provider.of<AppProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text("Mandi Prices")),
+      appBar: AppBar(title: const Text("Mandi Prices")),
       body: Column(
         children: [
           // 🔥 DROPDOWN
           Padding(
             padding: const EdgeInsets.all(12),
             child: DropdownButtonFormField<String>(
-              value: provider.selectedCrop,
-              decoration: InputDecoration(
+              initialValue: provider.selectedCrop,
+              decoration: const InputDecoration(
                 labelText: "Select Crop",
                 border: OutlineInputBorder(),
               ),
@@ -51,7 +55,7 @@ class _MarketScreenState extends State<MarketScreen> {
 
           // 🔄 LOADING
           if (provider.isLoadingPrices)
-            Expanded(child: Center(child: CircularProgressIndicator()))
+            const Expanded(child: Center(child: CircularProgressIndicator()))
           else
             Expanded(
               child: ListView.builder(
@@ -60,14 +64,14 @@ class _MarketScreenState extends State<MarketScreen> {
                   final item = provider.cropPrices[index];
 
                   return Card(
-                    margin: EdgeInsets.all(10),
+                    margin: const EdgeInsets.all(10),
                     child: ListTile(
-                      leading: Icon(Icons.agriculture, color: Colors.green),
+                      leading: const Icon(Icons.agriculture, color: Colors.green),
                       title: Text(item.market),
                       subtitle: Text("₹${item.minPrice} - ₹${item.maxPrice}"),
                       trailing: Text(
                         "₹${item.modalPrice}",
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
                           color: Colors.green,

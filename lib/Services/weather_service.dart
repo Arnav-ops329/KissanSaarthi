@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 class WeatherService {
@@ -27,7 +28,7 @@ class WeatherService {
         throw Exception("City API Failed");
       }
     } catch (e) {
-      print("CITY WEATHER ERROR: $e");
+      debugPrint("CITY WEATHER ERROR: $e");
 
       return {"temp": 28, "weather": "Clear", "humidity": 60, "wind": 2};
     }
@@ -56,7 +57,7 @@ class WeatherService {
         throw Exception("Location API Failed");
       }
     } catch (e) {
-      print("LOCATION WEATHER ERROR: $e");
+      debugPrint("LOCATION WEATHER ERROR: $e");
 
       /// fallback
       return await getWeather();

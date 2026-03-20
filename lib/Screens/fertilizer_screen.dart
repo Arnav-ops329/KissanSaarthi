@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
 class FertilizerScreen extends StatefulWidget {
+  const FertilizerScreen({super.key});
+
   @override
-  _FertilizerScreenState createState() => _FertilizerScreenState();
+  State<FertilizerScreen> createState() => _FertilizerScreenState();
 }
 
 class _FertilizerScreenState extends State<FertilizerScreen> {
@@ -13,6 +15,17 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
   TextEditingController areaController = TextEditingController();
 
   String result = "";
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args = ModalRoute.of(context)!.settings.arguments;
+    if (args is String && args.isNotEmpty) {
+      if (["Wheat", "Rice", "Potato", "Tomato"].contains(args)) {
+        setState(() => crop = args);
+      }
+    }
+  }
 
   void calculateFertilizer() {
     double area = double.tryParse(areaController.text) ?? 1;
@@ -85,82 +98,82 @@ $note
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Fertilizer Calculator")),
+      appBar: AppBar(title: const Text("Fertilizer Calculator")),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             // 🌾 Crop
-            DropdownButtonFormField(
-              value: crop,
+            DropdownButtonFormField<String>(
+              initialValue: crop,
               items: ["Wheat", "Rice", "Potato", "Tomato"]
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
               onChanged: (val) => setState(() => crop = val!),
-              decoration: InputDecoration(labelText: "Select Crop"),
+              decoration: const InputDecoration(labelText: "Select Crop"),
             ),
 
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
 
             // 🌱 Soil
-            DropdownButtonFormField(
-              value: soil,
+            DropdownButtonFormField<String>(
+              initialValue: soil,
               items: ["Alluvial", "Black", "Sandy"]
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
               onChanged: (val) => setState(() => soil = val!),
-              decoration: InputDecoration(labelText: "Soil Type"),
+              decoration: const InputDecoration(labelText: "Soil Type"),
             ),
 
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
 
             // 🌦 Weather
-            DropdownButtonFormField(
-              value: weather,
+            DropdownButtonFormField<String>(
+              initialValue: weather,
               items: ["Normal", "Dry", "Rainy"]
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
               onChanged: (val) => setState(() => weather = val!),
-              decoration: InputDecoration(labelText: "Weather Condition"),
+              decoration: const InputDecoration(labelText: "Weather Condition"),
             ),
 
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
 
             // 📏 Area input
             TextField(
               controller: areaController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Land Area (in acres)",
                 border: OutlineInputBorder(),
               ),
             ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // 🔘 Button
             ElevatedButton(
               onPressed: calculateFertilizer,
-              child: Text("Calculate"),
               style: ElevatedButton.styleFrom(
-                minimumSize: Size(double.infinity, 50),
+                minimumSize: const Size(double.infinity, 50),
               ),
+              child: const Text("Calculate"),
             ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // 📊 Result
             if (result.isNotEmpty)
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(14),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: Colors.green.shade100,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   result,
-                  style: TextStyle(fontSize: 15),
+                  style: const TextStyle(fontSize: 15),
                 ),
               ),
           ],

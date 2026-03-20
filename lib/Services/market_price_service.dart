@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/crop_price.dart';
 
@@ -8,11 +9,11 @@ class MarketPriceService {
       "http://10.0.2.2:5000/api/prices?crop=$crop",
     );
 
-    print("Calling API: $url");
+    debugPrint("Calling API: $url");
 
     final response = await http.get(url);
 
-    print("Response: ${response.body}");
+    debugPrint("Response: ${response.body}");
 
     if (response.statusCode == 200) {
       List data = jsonDecode(response.body);

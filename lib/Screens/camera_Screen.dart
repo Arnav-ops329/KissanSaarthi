@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import '../services/yolo_offline_service.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -11,11 +12,13 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   late CameraController controller;
   late List<CameraDescription> cameras;
+  bool isDetecting = false;
 
   @override
   void initState() {
     super.initState();
     initCamera();
+    YoloOfflineService.init();
   }
 
   Future initCamera() async {
@@ -31,12 +34,40 @@ class _CameraScreenState extends State<CameraScreen> {
     setState(() {});
   }
 
-  Future captureImage() async {
-    final image = await controller.takePicture();
+  Future<void> captureImage() async {
+    if (isDetecting) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Image captured: ${image.path}")),
-    );
+    setState(() {
+      isDetecting = true;
+    });
+
+    try {
+      final image = await controller.takePicture();
+
+      if (!mounted) return;
+
+      // 🚀 USE OFFLINE YOLO MODEL
+      final result = await YoloOfflineService.detectDisease(image.path);
+
+      if (!mounted) return;
+      Navigator.pushNamed(
+        context,
+        '/result',
+        arguments: result,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isDetecting = false;
+        });
+      }
+    }
   }
 
   @override

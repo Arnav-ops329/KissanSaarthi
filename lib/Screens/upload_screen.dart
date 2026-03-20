@@ -1,7 +1,6 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../services/disease_api_service.dart';
+import '../services/yolo_offline_service.dart';
 
 class UploadScreen extends StatefulWidget {
   const UploadScreen({super.key});
@@ -15,25 +14,34 @@ class _UploadScreenState extends State<UploadScreen> {
 
   final picker = ImagePicker();
 
-  Future pickImage() async {
+  @override
+  void initState() {
+    super.initState();
+    // Warm up the model
+    YoloOfflineService.init();
+  }
+
+  Future<void> pickImage() async {
     final picked = await picker.pickImage(source: ImageSource.gallery);
 
     if (picked == null) return;
 
-    detectDisease(picked.path);
+    await detectDisease(picked.path);
   }
 
-  Future detectDisease(String path) async {
+  Future<void> detectDisease(String path) async {
     setState(() {
       loading = true;
     });
 
-    var result = await DiseaseApiService.detectDisease(path);
+    // 🚀 USE OFFLINE YOLO MODEL
+    final result = await YoloOfflineService.detectDisease(path);
 
     setState(() {
       loading = false;
     });
 
+    if (!mounted) return;
     Navigator.pushNamed(
       context,
       '/result',

@@ -66,7 +66,7 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
           Padding(
             padding: const EdgeInsets.all(12),
             child: DropdownButtonFormField(
-              value: selectedState,
+              initialValue: selectedState,
               items: states
                   .map((e) => DropdownMenuItem(
                         value: e,

@@ -26,7 +26,7 @@ class InfoCard extends StatelessWidget {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: Colors.orange.withOpacity(0.2),
+            backgroundColor: Colors.orange.withValues(alpha: 0.2),
             child: Icon(icon, color: Colors.orange),
           ),
 

@@ -3,14 +3,19 @@ import 'package:flutter/material.dart';
 class FeatureCard extends StatelessWidget {
   final IconData icon;
   final String title;
-  final Function onTap;
+  final Function() onTap;
 
-  FeatureCard({required this.icon, required this.title, required this.onTap});
+  const FeatureCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => onTap(),
+      onTap: onTap,
 
       child: Card(
         elevation: 4,
@@ -19,11 +24,11 @@ class FeatureCard extends StatelessWidget {
           children: [
             Icon(icon, size: 50, color: Colors.green),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             Text(
               title,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ],
         ),

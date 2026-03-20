@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/disease_api_service.dart';
 
 class ResultScreen extends StatefulWidget {
   const ResultScreen({super.key});
@@ -9,7 +8,7 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
-  String disease = "Analyzing...";
+  String disease = "";
   String crop = "";
   String confidence = "";
   String solution = "";
@@ -20,25 +19,19 @@ class _ResultScreenState extends State<ResultScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    final imagePath = ModalRoute.of(context)!.settings.arguments as String;
-
-    analyzeImage(imagePath);
-  }
-
-  Future<void> analyzeImage(String path) async {
-    try {
-      final response = await DiseaseApiService.detectDisease(path);
-
+    final args = ModalRoute.of(context)!.settings.arguments;
+    
+    if (args is Map<String, dynamic>) {
       setState(() {
-        disease = response["disease"];
-        crop = response["crop"];
-        confidence = response["confidence"];
-        solution = response["solution"];
+        disease = args["disease"] ?? "Unknown";
+        crop = args["crop"] ?? "General";
+        confidence = args["confidence"] ?? "0";
+        solution = args["solution"] ?? "No solution provided";
         isLoading = false;
       });
-    } catch (e) {
+    } else {
       setState(() {
-        disease = "Error detecting disease";
+        disease = "Invalid Arguments";
         isLoading = false;
       });
     }

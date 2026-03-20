@@ -9,7 +9,6 @@ Kissan Saarthi is an AI-powered smart farming assistant designed to help farmers
 
 ### 🌿 1. Crop Disease Detection
 
-* Scan crops using camera
 * Upload images from gallery
 * AI-based disease prediction
 * Instant results with crop & disease info
@@ -51,7 +50,7 @@ Kissan Saarthi is an AI-powered smart farming assistant designed to help farmers
 
 ---
 
-### 🎤 6. Voice Assistant (Multi-language)
+### 🎤 6. Voice Assistant 
 
 * Fully voice-driven navigation
 * Commands like:

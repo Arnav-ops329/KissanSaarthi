@@ -35,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     _speech = stt.SpeechToText();
     tts = FlutterTts();
+
     tts.setLanguage("hi-IN");
 
     _controller = AnimationController(
@@ -42,21 +43,25 @@ class _HomeScreenState extends State<HomeScreen>
       duration: const Duration(milliseconds: 800),
     );
 
-    fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
     );
 
     slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.2),
+      begin: const Offset(0, 0.1),
       end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _controller.forward();
+
+    /// 🔥 AUTO START VOICE
+    Future.delayed(const Duration(seconds: 2), () {
+      startListening();
+    });
   }
 
-  Future loadWeather() async {
+  Future<void> loadWeather() async {
     var data = await WeatherService.getWeather();
 
     setState(() {
@@ -66,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen>
     });
   }
 
-  Future speak(String text) async {
+  Future<void> speak(String text) async {
     await tts.stop();
     await tts.speak(text);
   }
@@ -78,22 +83,35 @@ class _HomeScreenState extends State<HomeScreen>
       setState(() => isListening = true);
 
       _speech.listen(
+        listenOptions: stt.SpeechListenOptions(
+          listenMode: stt.ListenMode.confirmation,
+          partialResults: true,
+        ),
         onResult: (result) async {
           String text = result.recognizedWords.toLowerCase();
 
-          final action = VoiceCommandService.processCommand(text);
+          if (text.isNotEmpty) {
+            final action = VoiceCommandService.processCommand(text);
 
-          final safe = Map<String, String>.from(action);
+            final safe = Map<String, String>.from(action);
 
-          String route = safe["route"] ?? "";
-          String response = safe["response"] ?? "";
+            String route = safe["route"] ?? "";
+            String response = safe["response"] ?? "";
 
-          await speak(response);
+            await speak(response);
 
-          if (route.isNotEmpty) {
+            if (route.isNotEmpty && mounted) {
+              Navigator.pushNamed(context, route);
+            }
+          }
+
+          /// 🔁 RESTART LISTENING (IMPORTANT)
+          if (result.finalResult) {
             _speech.stop();
-            setState(() => isListening = false);
-            Navigator.pushNamed(context, route);
+
+            Future.delayed(const Duration(milliseconds: 500), () {
+              startListening();
+            });
           }
         },
       );
@@ -120,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen>
           boxShadow: isListening
               ? [
                   BoxShadow(
-                    color: Colors.green.withOpacity(0.6),
+                    color: Colors.green.withValues(alpha: 0.6),
                     blurRadius: 20,
                     spreadRadius: 2,
                   )
@@ -153,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen>
                           Icon(Icons.eco, color: Colors.green),
                           SizedBox(width: 8),
                           Text(
-                            "KisanSaarthi",
+                            "KissanSaarthi",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -183,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen>
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(24),
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                       ),
                       child: const Align(
                         alignment: Alignment.bottomLeft,
@@ -281,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen>
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 6),
             )
@@ -298,7 +316,8 @@ class _HomeScreenState extends State<HomeScreen>
                     fontSize: 20,
                     fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
-            Text(subtitle, style: TextStyle(color: textColor.withOpacity(0.7))),
+            Text(subtitle,
+                style: TextStyle(color: textColor.withValues(alpha: 0.7))),
           ],
         ),
       ),

@@ -26,7 +26,7 @@ class _CropRecommendationScreenState extends State<CropRecommendationScreen> {
   /// 📍 GET LOCATION + WEATHER
   Future loadLocationAndWeather() async {
     try {
-      LocationPermission permission = await Geolocator.requestPermission();
+      await Geolocator.requestPermission();
 
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);

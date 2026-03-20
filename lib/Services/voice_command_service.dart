@@ -1,37 +1,54 @@
 class VoiceCommandService {
-  static Map<String, String> processCommand(String command) {
-    command = command.toLowerCase();
+  static Map<String, String> processCommand(String text) {
+    text = text.toLowerCase();
 
-    if (_contains(command, ["scan", "camera"])) {
-      return {"route": "/scanner", "response": "Opening scanner"};
-    }
-
-    if (_contains(command, ["price", "mandi"])) {
-      return {"route": "/market", "response": "Opening mandi"};
-    }
-
-    if (_contains(command, ["fertilizer", "khad"])) {
-      return {"route": "/fertilizer", "response": "Opening fertilizer"};
-    }
-
-    if (_contains(command, ["crop", "fasal"])) {
+    if (text.contains("weather") || text.contains("mausam")) {
+      return {
+        "route": "/weather",
+        "response": "Opening weather screen",
+      };
+    } else if (text.contains("market") ||
+        text.contains("mandi") ||
+        text.contains("price")) {
+      return {
+        "route": "/market",
+        "response": "Opening mandi prices",
+      };
+    } else if (text.contains("scan") || text.contains("scanning")) {
+      return {
+        "route": "/scanner",
+        "response": "Opening crop scanner",
+      };
+    } else if (text.contains("upload") || text.contains("photo")) {
+      return {
+        "route": "/upload",
+        "response": "Opening upload screen",
+      };
+    } else if (text.contains("fertilizer") || text.contains("khad")) {
+      return {
+        "route": "/fertilizer",
+        "response": "Opening fertilizer calculator",
+      };
+    } else if (text.contains("crop") || text.contains("fasal")) {
       return {
         "route": "/crop_recommend",
-        "response": "Opening crop suggestion"
+        "response": "Opening crop recommendation",
+      };
+    } else if (text.contains("scheme") || text.contains("yojana")) {
+      return {
+        "route": "/schemes",
+        "response": "Opening government schemes",
+      };
+    } else if (text.contains("chat") || text.contains("assistant")) {
+      return {
+        "route": "/chat",
+        "response": "Opening AI assistant",
       };
     }
 
-    if (_contains(command, ["weather", "mausam"])) {
-      return {"route": "/weather", "response": "Opening weather"};
-    }
-
-    return {"route": "", "response": "Samajh nahi aaya, dobara boliye"};
-  }
-
-  static bool _contains(String text, List<String> words) {
-    for (var word in words) {
-      if (text.contains(word)) return true;
-    }
-    return false;
+    return {
+      "route": "",
+      "response": "Sorry, I did not understand. Please try again.",
+    };
   }
 }

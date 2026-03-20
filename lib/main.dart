@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
 import 'providers/locale_provider.dart';
 
-import 'services/translation_service.dart';
 import 'screens/government_scheme_screen.dart';
 
 // Screens
