@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/app_provider.dart';
+import '../providers/voice_flow_provider.dart';
+import '../Widgets/global_voice_button.dart';
 
 class FertilizerScreen extends StatefulWidget {
   const FertilizerScreen({super.key});
@@ -15,6 +19,21 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
   TextEditingController areaController = TextEditingController();
 
   String result = "";
+  String verifiedAdvice = "";
+
+  @override
+  void initState() {
+    super.initState();
+    areaController.addListener(() {
+      setState(() {});
+    });
+
+    // Initialize crop from AppProvider
+    final appProv = Provider.of<AppProvider>(context, listen: false);
+    if (appProv.selectedCrop.isNotEmpty && ["Wheat", "Rice", "Potato", "Tomato"].contains(appProv.selectedCrop)) {
+      crop = appProv.selectedCrop;
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -27,43 +46,52 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
     }
   }
 
-  void calculateFertilizer() {
-    double area = double.tryParse(areaController.text) ?? 1;
+  void calculateFertilizer({String? overrideCrop, String? overrideArea}) {
+    final String activeCrop = overrideCrop ?? crop;
+    final double area = double.tryParse(overrideArea ?? areaController.text) ?? 1;
 
     int n = 0, p = 0, k = 0;
 
-    // 🌾 Base recommendation
-    if (crop == "Wheat") {
+    // 🌾 Base recommendation (ICAR Verified Standards)
+    if (activeCrop == "Wheat") {
       n = 120;
       p = 60;
       k = 40;
-    } else if (crop == "Rice") {
+      verifiedAdvice =
+          "Apply 1/2 Nitrogen and full P & K as basal dose. Apply remaining N in two splits at CRI and Flowering stages.";
+    } else if (activeCrop == "Rice") {
       n = 100;
       p = 50;
       k = 50;
-    } else if (crop == "Potato") {
+      verifiedAdvice =
+          "Apply N in three equal splits: Basal, Tillering, and Panicle Initiation. Apply P & K as basal.";
+    } else if (activeCrop == "Potato") {
       n = 150;
       p = 80;
-      k = 60;
-    } else if (crop == "Tomato") {
+      k = 120;
+      verifiedAdvice =
+          "Apply 1/2 Nitrogen and full P & K at planting. Remaining N should be top-dressed at earthing up.";
+    } else if (activeCrop == "Tomato") {
       n = 120;
       p = 60;
       k = 60;
+      verifiedAdvice =
+          "Apply Basal Dose of N,P,K. Top dress N in 3 splits at 30, 60, and 90 days after transplanting.";
     }
 
     // 🌱 Soil adjustment
     if (soil == "Sandy") {
-      n += 20; // more nitrogen needed
+      n += 20;
     } else if (soil == "Black") {
-      k += 10; // potassium rich soil
+      k += 10;
     }
 
     // 🌦 Weather adjustment
     String note = "";
     if (weather == "Rainy") {
-      note = "Apply fertilizer in split doses to avoid washout.";
+      note = "Top-dress nitrogen only when soil is moist but not waterlogged.";
     } else if (weather == "Dry") {
-      note = "Ensure irrigation after fertilizer application.";
+      note = "Irrigate immediately after applying urea to prevent ammonia volatilization.";
     }
 
     // 📦 Convert to actual fertilizers
@@ -71,25 +99,23 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
     double dap = (p / 0.46) * area;
     double mop = (k / 0.60) * area;
 
-    // 💰 Cost estimation (approx)
-    double cost = (urea * 6) + (dap * 25) + (mop * 15); // ₹ per kg approx
+    double cost = (urea * 6) + (dap * 25) + (mop * 15);
 
     result = """
-🌾 Crop: $crop
+🌾 Crop: $activeCrop
 📍 Area: ${area.toStringAsFixed(1)} acre
 
-🧪 NPK Requirement:
-N: $n kg | P: $p kg | K: $k kg (per acre)
+🧪 NPK Requirement (per acre):
+N: $n kg | P: $p kg | K: $k kg
 
-📦 Fertilizer Needed:
+📦 Recommended Fertilizer:
 Urea: ${urea.toStringAsFixed(1)} kg
 DAP: ${dap.toStringAsFixed(1)} kg
 MOP: ${mop.toStringAsFixed(1)} kg
 
 💰 Estimated Cost: ₹${cost.toStringAsFixed(0)}
 
-⚠️ Advice:
-$note
+⚠️ Advice: $note
 """;
 
     setState(() {});
@@ -97,88 +123,133 @@ $note
 
   @override
   Widget build(BuildContext context) {
+    final voiceFlow = Provider.of<VoiceFlowProvider>(context);
+
+    // 🛡️ REFACTORED: Compute display values instead of modifying state in build
+    final String displayCrop = (voiceFlow.activeFlow == VoiceFlow.fertilizer && voiceFlow.data.containsKey('crop'))
+        ? voiceFlow.data['crop']!
+        : crop;
+
+    final String displayArea = (voiceFlow.activeFlow == VoiceFlow.fertilizer && voiceFlow.data.containsKey('area'))
+        ? voiceFlow.data['area']!
+        : areaController.text;
+
+    // Trigger calculation if derived data differs and is ready
+    if (result.isEmpty || !result.contains(displayArea) || !result.contains(displayCrop)) {
+      // Defer state update to next frame to avoid build-time errors
+      Future.microtask(() {
+        if (mounted) calculateFertilizer(overrideCrop: displayCrop, overrideArea: displayArea);
+      });
+    }
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Fertilizer Calculator")),
+      appBar: AppBar(
+        title: const Text("Fertilizer Calculator"),
+        actions: [
+          if (voiceFlow.activeFlow == VoiceFlow.fertilizer)
+            IconButton(onPressed: () => voiceFlow.stopFlow(), icon: const Icon(Icons.stop_circle, color: Colors.red))
+        ],
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (voiceFlow.activeFlow == VoiceFlow.fertilizer)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.green.shade200)),
+                child: Row(
+                  children: [
+                    const Icon(Icons.mic, color: Colors.green),
+                    const SizedBox(width: 10),
+                    Expanded(child: Text(voiceFlow.lastGuidance, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green))),
+                  ],
+                ),
+              ),
+
             // 🌾 Crop
             DropdownButtonFormField<String>(
-              initialValue: crop,
+              initialValue: displayCrop,
               items: ["Wheat", "Rice", "Potato", "Tomato"]
                   .map((e) => DropdownMenuItem(value: e, child: Text(e)))
                   .toList(),
-              onChanged: (val) => setState(() => crop = val!),
-              decoration: const InputDecoration(labelText: "Select Crop"),
+              onChanged: (val) {
+                setState(() => crop = val!);
+                calculateFertilizer();
+              },
+              decoration: const InputDecoration(
+                  labelText: "Select Crop", border: OutlineInputBorder()),
             ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 15),
-
-            // 🌱 Soil
-            DropdownButtonFormField<String>(
-              initialValue: soil,
-              items: ["Alluvial", "Black", "Sandy"]
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (val) => setState(() => soil = val!),
-              decoration: const InputDecoration(labelText: "Soil Type"),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: soil,
+                    items: ["Alluvial", "Black", "Sandy"]
+                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .toList(),
+                    onChanged: (val) {
+                      setState(() => soil = val!);
+                      calculateFertilizer();
+                    },
+                    decoration: const InputDecoration(labelText: "Soil Type", border: OutlineInputBorder()),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: weather,
+                    items: ["Normal", "Dry", "Rainy"]
+                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .toList(),
+                    onChanged: (val) {
+                      setState(() => weather = val!);
+                      calculateFertilizer();
+                    },
+                    decoration: const InputDecoration(labelText: "Weather", border: OutlineInputBorder()),
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 15),
-
-            // 🌦 Weather
-            DropdownButtonFormField<String>(
-              initialValue: weather,
-              items: ["Normal", "Dry", "Rainy"]
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (val) => setState(() => weather = val!),
-              decoration: const InputDecoration(labelText: "Weather Condition"),
-            ),
-
-            const SizedBox(height: 15),
-
-            // 📏 Area input
             TextField(
               controller: areaController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Land Area (in acres)",
-                border: OutlineInputBorder(),
-              ),
+              decoration: const InputDecoration(labelText: "Land Area (in acres)", border: OutlineInputBorder(), prefixIcon: Icon(Icons.landscape)),
+              onSubmitted: (_) => calculateFertilizer(),
             ),
+            const SizedBox(height: 30),
 
-            const SizedBox(height: 20),
-
-            // 🔘 Button
-            ElevatedButton(
-              onPressed: calculateFertilizer,
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-              ),
-              child: const Text("Calculate"),
-            ),
-
-            const SizedBox(height: 20),
-
-            // 📊 Result
-            if (result.isNotEmpty)
+            if (result.isNotEmpty) ...[
+              const Text("Calculation Result", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.green.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  result,
-                  style: const TextStyle(fontSize: 15),
-                ),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.green.shade100)),
+                child: Text(result, style: const TextStyle(fontSize: 16, height: 1.5)),
               ),
+              const SizedBox(height: 20),
+              const Text("📝 Verified Agri Advice", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.blue.shade100)),
+                child: Text(verifiedAdvice, style: const TextStyle(fontSize: 14, color: Colors.blue)),
+              ),
+            ],
           ],
         ),
       ),
+      floatingActionButton: const GlobalVoiceButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }

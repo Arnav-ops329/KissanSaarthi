@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/app_provider.dart';
 import 'providers/locale_provider.dart';
+import 'providers/voice_flow_provider.dart';
 
 import 'screens/government_scheme_screen.dart';
 
@@ -28,6 +29,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => AppProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => VoiceFlowProvider()),
       ],
       child: const KissanSaarthiApp(),
     ),

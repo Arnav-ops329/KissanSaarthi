@@ -1,9 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_tts/flutter_tts.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
-import '../services/weather_service.dart';
-import '../services/voice_command_service.dart';
+import '../providers/app_provider.dart';
+import '../Widgets/global_voice_button.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,331 +15,351 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
-  double temp = 28;
-  int humidity = 60;
-  String weather = "Partly Cloudy";
+  final ImagePicker _picker = ImagePicker();
 
-  late stt.SpeechToText _speech;
-  late FlutterTts tts;
-
-  bool isListening = false;
-
-  late AnimationController _controller;
-  late Animation<double> fadeAnimation;
-  late Animation<Offset> slideAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-
-    loadWeather();
-
-    _speech = stt.SpeechToText();
-    tts = FlutterTts();
-
-    tts.setLanguage("hi-IN");
-
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 800),
-    );
-
-    fadeAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
-
-    slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
-    _controller.forward();
-
-    /// 🔥 AUTO START VOICE
-    Future.delayed(const Duration(seconds: 2), () {
-      startListening();
-    });
-  }
-
-  Future<void> loadWeather() async {
-    var data = await WeatherService.getWeather();
-
-    setState(() {
-      temp = (data["temp"] as num).toDouble();
-      humidity = data["humidity"];
-      weather = data["weather"];
-    });
-  }
-
-  Future<void> speak(String text) async {
-    await tts.stop();
-    await tts.speak(text);
-  }
-
-  void startListening() async {
-    bool available = await _speech.initialize();
-
-    if (available) {
-      setState(() => isListening = true);
-
-      _speech.listen(
-        listenOptions: stt.SpeechListenOptions(
-          listenMode: stt.ListenMode.confirmation,
-          partialResults: true,
-        ),
-        onResult: (result) async {
-          String text = result.recognizedWords.toLowerCase();
-
-          if (text.isNotEmpty) {
-            final action = VoiceCommandService.processCommand(text);
-
-            final safe = Map<String, String>.from(action);
-
-            String route = safe["route"] ?? "";
-            String response = safe["response"] ?? "";
-
-            await speak(response);
-
-            if (route.isNotEmpty && mounted) {
-              Navigator.pushNamed(context, route);
-            }
-          }
-
-          /// 🔁 RESTART LISTENING (IMPORTANT)
-          if (result.finalResult) {
-            _speech.stop();
-
-            Future.delayed(const Duration(milliseconds: 500), () {
-              startListening();
-            });
-          }
-        },
-      );
+  Future<void> _handleScanAction(ImageSource source) async {
+    final XFile? pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null && mounted) {
+      Navigator.pushNamed(context, "/upload", arguments: pickedFile.path);
     }
   }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _speech.stop();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final appProv = Provider.of<AppProvider>(context);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F6F4),
-
-      /// 🎤 VOICE BUTTON WITH PULSE
-      floatingActionButton: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: isListening
-              ? [
-                  BoxShadow(
-                    color: Colors.green.withValues(alpha: 0.6),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                  )
-                ]
-              : [],
-        ),
-        child: FloatingActionButton(
-          onPressed: startListening,
-          backgroundColor: Colors.green,
-          child: Icon(isListening ? Icons.mic : Icons.mic_none),
-        ),
-      ),
-
+      backgroundColor: const Color(0xFFF7FAF7),
       body: SafeArea(
-        child: FadeTransition(
-          opacity: fadeAnimation,
-          child: SlideTransition(
-            position: slideAnimation,
-            child: SingleChildScrollView(
-              physics: const ClampingScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  /// 🔝 HEADER
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: const [
-                          Icon(Icons.eco, color: Colors.green),
-                          SizedBox(width: 8),
-                          Text(
-                            "KissanSaarthi",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const CircleAvatar(
-                        backgroundImage: AssetImage("assets/tractor.png"),
-                      )
-                    ],
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// 🌾 HERO CARD
-                  Container(
-                    height: 200,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(24),
-                      image: const DecorationImage(
-                        image: AssetImage("assets/Tractor2.png"),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        color: Colors.black.withValues(alpha: 0.3),
-                      ),
-                      child: const Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Text(
-                          "AI-based farmer assistant",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// 🌦 WEATHER CARD
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            const Icon(Icons.wb_sunny, size: 40),
-                            const SizedBox(width: 10),
-                            Text(
-                              "${temp.toStringAsFixed(0)}°C",
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Text(weather),
-                        Text("Humidity: $humidity%"),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  /// 📸 SCAN
-                  featureCard(
-                    "Scan Crop",
-                    "Identify pests and diseases instantly using AI.",
-                    Colors.green,
-                    "/scanner",
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  /// 📤 UPLOAD
-                  featureCard(
-                    "Upload Image",
-                    "Analyze previously taken photos.",
-                    Colors.grey.shade300,
-                    "/upload",
-                    textColor: Colors.black,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  simpleCard("Mandi Prices", "/market"),
-                  const SizedBox(height: 12),
-                  simpleCard("Fertilizer", "/fertilizer"),
-                  const SizedBox(height: 12),
-                  simpleCard("Crop Suggest", "/crop_recommend"),
-                  simpleCard("Government Schemes", "/schemes"),
-                ],
-              ),
-            ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildAppBar(),
+              const SizedBox(height: 20),
+              _buildPrecisionBanner(),
+              const SizedBox(height: 20),
+              _buildWeatherCard(appProv),
+              const SizedBox(height: 20),
+              _buildMainFeatureCards(),
+              const SizedBox(height: 20),
+              _buildSmallFeatureList(),
+              const SizedBox(height: 100), // Space for voice button
+            ],
           ),
         ),
       ),
+      floatingActionButton: const GlobalVoiceButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  /// 🔥 BIG CARD
-  Widget featureCard(String title, String subtitle, Color color, String route,
-      {Color textColor = Colors.white}) {
-    return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, route),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
+  Widget _buildAppBar() {
+    return Row(
+      children: [
+        const Icon(Icons.eco, color: Color(0xFF2E7D32), size: 30),
+        const SizedBox(width: 8),
+        const Text(
+          "KisaanSaarthi",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF2E7D32),
+          ),
+        ),
+        const Spacer(),
+        const SizedBox(width: 15),
+        const CircleAvatar(
+          radius: 18,
+          backgroundImage: NetworkImage(
+              'https://cdn-icons-png.flaticon.com/512/1118/1118931.png'),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPrecisionBanner() {
+    return Container(
+      height: 180,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(30),
+        image: DecorationImage(
+          image: FileImage(File(
+              'C:/Users/User/.gemini/antigravity/brain/127276db-1cd1-4900-980f-e689f4ccf547/precision_farming_banner_1774043652550.png')),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              gradient: LinearGradient(
+                colors: [Colors.black.withAlpha(150), Colors.transparent],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withAlpha(200),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.agriculture,
+                      color: Color(0xFF2E7D32), size: 30),
+                ),
+                const SizedBox(width: 15),
+                const Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("AI-powered",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold)),
+                    Text("SMART FARMER AI",
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900)),
+                    Text("Monitoring your field's health",
+                        style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeatherCard(AppProvider provider) {
+    final weather = provider.weatherData;
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F5E9),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.wb_sunny, color: Colors.orange, size: 40),
+                  const SizedBox(width: 15),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        weather?['weather'] ?? "Partly Cloudy",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      Text(
+                        "Humidity ${weather?['humidity'] ?? 64}%",
+                        style:
+                            const TextStyle(color: Colors.grey, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              Text(
+                "${(weather?['temp'] ?? 28).toStringAsFixed(0)}°C",
+                style: const TextStyle(
+                    fontSize: 36,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF2E7D32)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.lightbulb, color: Colors.brown, size: 16),
+              const SizedBox(width: 8),
+              const Text("SMART TIP",
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.brown)),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            "Perfect weather for nitrogen application today.",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: Color(0xFF2E7D32)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainFeatureCards() {
+    return Column(
+      children: [
+        _largeFeatureCard(
+          title: "Scan Crop",
+          subtitle: "Identify pests and diseases instantly using AI.",
+          icon: Icons.filter_center_focus,
+          baseColor: const Color(0xFF2E7D32),
+          textColor: Colors.white,
+          onTap: () => _handleScanAction(ImageSource.camera),
+        ),
+        const SizedBox(height: 16),
+        _largeFeatureCard(
+          title: "Upload Image",
+          subtitle: "Analyze previously taken photos from your gallery.",
+          icon: Icons.add_to_photos,
+          baseColor: Colors.white,
+          textColor: const Color(0xFF2E7D32),
+          hasPlus: true,
+          onTap: () => _handleScanAction(ImageSource.gallery),
+        ),
+      ],
+    );
+  }
+
+  Widget _largeFeatureCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color baseColor,
+    required Color textColor,
+    bool hasPlus = false,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(24),
+          color: baseColor,
+          borderRadius: BorderRadius.circular(30),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 6),
-            )
+            if (baseColor == Colors.white)
+              BoxShadow(
+                  color: Colors.black.withAlpha(12),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4)),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.qr_code_scanner, color: textColor),
-            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: textColor.withAlpha(40),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Icon(icon, color: textColor, size: 30),
+                ),
+                if (!hasPlus) Icon(Icons.arrow_forward, color: textColor),
+              ],
+            ),
+            const SizedBox(height: 20),
             Text(title,
                 style: TextStyle(
-                    color: textColor,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: textColor)),
+            const SizedBox(height: 4),
             Text(subtitle,
-                style: TextStyle(color: textColor.withValues(alpha: 0.7))),
+                style:
+                    TextStyle(fontSize: 14, color: textColor.withAlpha(180))),
+            if (hasPlus) ...[
+              const SizedBox(height: 10),
+              Align(
+                  alignment: Alignment.bottomRight,
+                  child: CircleAvatar(
+                      radius: 12,
+                      backgroundColor: textColor.withAlpha(40),
+                      child: Icon(Icons.add, color: textColor, size: 16))),
+            ],
           ],
         ),
       ),
     );
   }
 
-  /// 🔹 SMALL CARD
-  Widget simpleCard(String title, String route) {
-    return GestureDetector(
+  Widget _buildSmallFeatureList() {
+    return Column(
+      children: [
+        _smallFeatureRow(
+            "Mandi Prices",
+            "Real-time market rates and trend analysis.",
+            Icons.attach_money,
+            Colors.orange.shade800,
+            "/market"),
+        const SizedBox(height: 12),
+        _smallFeatureRow(
+            "Fertilizer",
+            "Nutrition plans and fertilizer calculators.",
+            Icons.science,
+            Colors.teal,
+            "/fertilizer"),
+        const SizedBox(height: 12),
+        _smallFeatureRow(
+            "Crop Suggest",
+            "Smart recommendations based on your soil.",
+            Icons.psychology,
+            Colors.blueGrey,
+            "/crop_recommend"),
+      ],
+    );
+  }
+
+  Widget _smallFeatureRow(
+      String title, String subtitle, IconData icon, Color color, String route) {
+    return InkWell(
       onTap: () => Navigator.pushNamed(context, route),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(18),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
         ),
         child: Row(
           children: [
-            const Icon(Icons.circle, size: 12),
-            const SizedBox(width: 10),
-            Text(title),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                  color: color.withAlpha(30), shape: BoxShape.circle),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w900, fontSize: 16)),
+                  Text(subtitle,
+                      style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                ],
+              ),
+            ),
           ],
         ),
       ),

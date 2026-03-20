@@ -1,54 +1,87 @@
 class VoiceCommandService {
   static Map<String, String> processCommand(String text) {
-    text = text.toLowerCase();
+    text = text.toLowerCase().trim();
 
-    if (text.contains("weather") || text.contains("mausam")) {
+    // 🎙️ Direct Keywords (No Wake Word Required)
+    if (text.contains("weather") || text.contains("mausam") || text.contains("mousam")) {
       return {
         "route": "/weather",
-        "response": "Opening weather screen",
+        "response": "Opening weather reports.",
+        "flow": "weatherQuery",
       };
-    } else if (text.contains("market") ||
-        text.contains("mandi") ||
-        text.contains("price")) {
+    }
+
+    if (text.contains("mandi") || text.contains("price") || text.contains("market") || text.contains("daam") || text.contains("bhav")) {
+      String? found;
+      final crops = ["wheat", "rice", "potato", "tomato", "cotton"];
+      for (var c in crops) {
+        if (text.contains(c)) {
+          found = c;
+          break;
+        }
+      }
       return {
         "route": "/market",
-        "response": "Opening mandi prices",
+        "response": found != null ? "Checking $found prices." : "Opening Mandi prices.",
+        "flow": "mandiPrice",
+        "crop": found ?? "",
       };
-    } else if (text.contains("scan") || text.contains("scanning")) {
-      return {
-        "route": "/scanner",
-        "response": "Opening crop scanner",
-      };
-    } else if (text.contains("upload") || text.contains("photo")) {
+    }
+
+    if (text.contains("scan") || text.contains("upload") || text.contains("photo") || text.contains("bimari")) {
       return {
         "route": "/upload",
-        "response": "Opening upload screen",
+        "response": "Opening crop scanner.",
+        "flow": "cropScan",
       };
-    } else if (text.contains("fertilizer") || text.contains("khad")) {
+    }
+
+    if (text.contains("fertilizer") || text.contains("khad") || text.contains("calculate")) {
       return {
         "route": "/fertilizer",
-        "response": "Opening fertilizer calculator",
+        "response": "Opening fertilizer calculator.",
+        "flow": "fertilizer",
       };
-    } else if (text.contains("crop") || text.contains("fasal")) {
+    }
+
+    if (text.contains("crop") || text.contains("recommend") || text.contains("suggest") || text.contains("advice") || text.contains("fasal")) {
       return {
         "route": "/crop_recommend",
-        "response": "Opening crop recommendation",
+        "response": "Opening crop recommendations.",
+        "flow": "cropRecommend",
       };
-    } else if (text.contains("scheme") || text.contains("yojana")) {
+    }
+
+    if (text.contains("scheme") || text.contains("yojana") || text.contains("government")) {
       return {
         "route": "/schemes",
-        "response": "Opening government schemes",
+        "response": "Opening government schemes.",
       };
-    } else if (text.contains("chat") || text.contains("assistant")) {
+    }
+
+    // 🎙️ Wake Word Fallback: "Hey Kisan" (for general AI conversation)
+    final wakeWords = [
+      "hey kisan",
+      "hey kishan",
+      "hey kissan",
+      "hi kisan",
+      "hey kisan ji",
+      "hey kisaan",
+      "kisan kisan",
+      "kissan kissan"
+    ];
+    
+    bool hasWakeWord = wakeWords.any((word) => text.contains(word));
+    if (hasWakeWord) {
       return {
         "route": "/chat",
-        "response": "Opening AI assistant",
+        "response": "I am here to help you. Opening AI Assistant.",
       };
     }
 
     return {
       "route": "",
-      "response": "Sorry, I did not understand. Please try again.",
+      "response": "Sorry, I did not understand. Try saying 'Mandi price' or 'Weather'.",
     };
   }
 }

@@ -1,5 +1,19 @@
 class DiseaseSolutionsService {
-  static const Map<String, String> _solutions = {
+  static String getSolution(String label) {
+    // 🛡️ Normalize for robust lookup:
+    // 1. Exact match (case-insensitive)
+    final key = label.trim().toLowerCase();
+    
+    // Check direct map (standardized keys)
+    final found = _solutions[key] ?? 
+                 _solutions[label.trim()] ?? 
+                 // Handle specific weirdness in labels.txt if it persists
+                 _solutions[label.trim().replaceAll('  ', ' ').replaceAll(' ', '_')];
+
+    return found ?? 'Consult a local agricultural expert for detailed management steps.';
+  }
+
+  static final Map<String, String> _solutions = {
     // BANANA
     'banana_bract_mosaic_virus': 'Remove and destroy infected plants. Control aphids. Use virus-free planting materials.',
     'banana_cordana': 'Improve drainage. Apply balanced potash fertilizers. Use fungicides like Mancozeb if severe.',
@@ -12,7 +26,7 @@ class DiseaseSolutionsService {
     'banana_yb_sigatoka': 'Prune and burn infected leaves. Spray mineral oils or recommended fungicides.',
 
     // CAULIFLOWER
-    'cauliflower_Blackrot': 'Use disease-free seeds. Treat seeds with hot water. Rotate crops and avoid overhead irrigation.',
+    'cauliflower_blackrot': 'Use disease-free seeds. Treat seeds with hot water. Rotate crops and avoid overhead irrigation.',
     'cauliflower_bacterial _spot _rot': 'Apply copper-based sprays. Remove infected debris. Avoid handling plants when wet.',
     'cauliflower_downy_mildew': 'Apply Metalaxyl or Mancozeb. Increase plant spacing. Use balanced nitrogen levels.',
     'cauliflower_healthy': 'Healthy crop. Maintain consistent moisture and weed control.',
@@ -40,10 +54,4 @@ class DiseaseSolutionsService {
     'radish_healthy': 'Healthy plant. Ensure consistent watering to prevent root splitting.',
     'radish_mosaic': 'Control aphids which spread the virus. Remove infected plants immediately.',
   };
-
-  static String getSolution(String label) {
-    // Normalize label to match keys (lowercase, trim)
-    final key = label.toLowerCase().trim();
-    return _solutions[key] ?? _solutions[key.replaceAll(' ', '_')] ?? 'Consult a local agricultural expert for detailed management steps.';
-  }
 }

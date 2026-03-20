@@ -39,7 +39,7 @@ class _ResultScreenState extends State<ResultScreen> {
 
   Widget buildInfoCard(String title, String value, IconData icon) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.symmetric(vertical: 8),
       child: ListTile(
         leading: Icon(icon, color: Colors.green),
         title: Text(title),
@@ -58,52 +58,13 @@ class _ResultScreenState extends State<ResultScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  /// 🌾 Crop
                   buildInfoCard("Crop", crop, Icons.eco),
-
-                  /// 🦠 Disease
                   buildInfoCard("Disease", disease, Icons.bug_report),
-
-                  /// 📊 Confidence
                   buildInfoCard("Confidence", "$confidence%", Icons.analytics),
-
-                  /// 💊 Solution
                   buildInfoCard("Solution", solution, Icons.healing),
-
-                  SizedBox(height: 20),
-
-                  /// 🌱 Fertilizer Button
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/fertilizer',
-                        arguments: crop,
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 50),
-                      backgroundColor: Colors.green,
-                    ),
-                    child: Text("Get Fertilizer Advice"),
-                  ),
-
-                  SizedBox(height: 10),
-
-                  /// 💰 Mandi Button
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/market');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      minimumSize: Size(double.infinity, 50),
-                      backgroundColor: Colors.orange,
-                    ),
-                    child: Text("Check Market Prices"),
-                  ),
                 ],
               ),
             ),

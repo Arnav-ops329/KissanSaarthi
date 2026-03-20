@@ -1,0 +1,34 @@
+﻿Analyzing kissansaarthi...                                      
+
+   info - Statements in an if should be enclosed in a block - lib\Screens\fertilizer_screen.dart:63:26 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\Screens\fertilizer_screen.dart:64:31 - curly_braces_in_flow_control_structures
+warning - The value of the local variable 'note' isn't used - lib\Screens\fertilizer_screen.dart:67:12 - unused_local_variable
+   info - Statements in an if should be enclosed in a block - lib\Screens\fertilizer_screen.dart:68:29 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\Screens\fertilizer_screen.dart:69:32 - curly_braces_in_flow_control_structures
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\Screens\fertilizer_screen.dart:144:15 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\Screens\fertilizer_screen.dart:160:21 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\Screens\fertilizer_screen.dart:174:21 - deprecated_member_use
+   info - Statements in an if should be enclosed in a block - lib\Screens\home_screen.dart:76:15 - curly_braces_in_flow_control_structures
+   info - Statements in an if should be enclosed in a block - lib\Screens\home_screen.dart:92:17 - curly_braces_in_flow_control_structures
+
+flutter : 10 issues 
+found. (ran in 3.5s)
+At line:1 char:1
++ flutter analyze 
+--no-pub > 
+last_errors.txt 2>&1 | 
+out-null; Get-Conte ...
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (10 issues fou   
+ nd. (ran in 3.5s):    
+String) [], Remote    
+Exception
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+
