@@ -92,3 +92,17 @@ app.get("/api/prices", (req, res) => {
 app.listen(5000, () => {
   console.log("Server running on port 5000");
 });
+
+const fs = require("fs");
+
+app.get("/api/schemes", (req, res) => {
+  try {
+    const data = fs.readFileSync("schemes.json");
+    const schemes = JSON.parse(data);
+
+    res.json(schemes);
+  } catch (err) {
+    console.error("SCHEME ERROR:", err);
+    res.status(500).json({ error: "Failed to load schemes" });
+  }
+});

@@ -8,6 +8,7 @@ import 'providers/app_provider.dart';
 import 'providers/locale_provider.dart';
 
 import 'services/translation_service.dart';
+import 'screens/government_scheme_screen.dart';
 
 // Screens
 import 'screens/splash_screen.dart';
@@ -102,6 +103,8 @@ class KissanSaarthiApp extends StatelessWidget {
 
         // 🌱 🔥 NEW FEATURE: Crop recommendation
         '/crop_recommend': (context) => CropRecommendationScreen(),
+
+        '/schemes': (context) => const GovernmentSchemesScreen(),
       },
     );
   }
