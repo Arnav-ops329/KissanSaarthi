@@ -258,6 +258,7 @@ class _HomeScreenState extends State<HomeScreen>
                   simpleCard("Fertilizer", "/fertilizer"),
                   const SizedBox(height: 12),
                   simpleCard("Crop Suggest", "/crop_recommend"),
+                  simpleCard("Government Schemes", "/schemes"),
                 ],
               ),
             ),
