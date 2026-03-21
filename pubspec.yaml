@@ -42,7 +42,5 @@ flutter:
     - assets/tractor.png
     - assets/plant.png
     - assets/Tractor2.png
-    - localization/en.json
-    - localization/hi.json
     - assets/models/best.onnx
     - assets/models/labels.txt

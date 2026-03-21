@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/app_provider.dart';
 import '../providers/voice_flow_provider.dart';
 import '../Widgets/global_voice_button.dart';
+import '../localization/app_localizations.dart';
 
 class FertilizerScreen extends StatefulWidget {
   const FertilizerScreen({super.key});
@@ -30,7 +31,8 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
 
     // Initialize crop from AppProvider
     final appProv = Provider.of<AppProvider>(context, listen: false);
-    if (appProv.selectedCrop.isNotEmpty && ["Wheat", "Rice", "Potato", "Tomato"].contains(appProv.selectedCrop)) {
+    if (appProv.selectedCrop.isNotEmpty &&
+        ["Wheat", "Rice", "Potato", "Tomato"].contains(appProv.selectedCrop)) {
       crop = appProv.selectedCrop;
     }
   }
@@ -48,7 +50,8 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
 
   void calculateFertilizer({String? overrideCrop, String? overrideArea}) {
     final String activeCrop = overrideCrop ?? crop;
-    final double area = double.tryParse(overrideArea ?? areaController.text) ?? 1;
+    final double area =
+        double.tryParse(overrideArea ?? areaController.text) ?? 1;
 
     int n = 0, p = 0, k = 0;
 
@@ -91,7 +94,12 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
     if (weather == "Rainy") {
       note = "Top-dress nitrogen only when soil is moist but not waterlogged.";
     } else if (weather == "Dry") {
-      note = "Irrigate immediately after applying urea to prevent ammonia volatilization.";
+      note =
+          "Irrigate immediately after applying urea to prevent ammonia volatilization.";
+    }
+
+    if (note.isNotEmpty) {
+      verifiedAdvice = "$verifiedAdvice\n\n🌦 Weather Note: $note";
     }
 
     // 📦 Convert to actual fertilizers
@@ -114,8 +122,6 @@ DAP: ${dap.toStringAsFixed(1)} kg
 MOP: ${mop.toStringAsFixed(1)} kg
 
 💰 Estimated Cost: ₹${cost.toStringAsFixed(0)}
-
-⚠️ Advice: $note
 """;
 
     setState(() {});
@@ -126,28 +132,36 @@ MOP: ${mop.toStringAsFixed(1)} kg
     final voiceFlow = Provider.of<VoiceFlowProvider>(context);
 
     // 🛡️ REFACTORED: Compute display values instead of modifying state in build
-    final String displayCrop = (voiceFlow.activeFlow == VoiceFlow.fertilizer && voiceFlow.data.containsKey('crop'))
+    final String displayCrop = (voiceFlow.activeFlow == VoiceFlow.fertilizer &&
+            voiceFlow.data.containsKey('crop'))
         ? voiceFlow.data['crop']!
         : crop;
 
-    final String displayArea = (voiceFlow.activeFlow == VoiceFlow.fertilizer && voiceFlow.data.containsKey('area'))
+    final String displayArea = (voiceFlow.activeFlow == VoiceFlow.fertilizer &&
+            voiceFlow.data.containsKey('area'))
         ? voiceFlow.data['area']!
         : areaController.text;
 
     // Trigger calculation if derived data differs and is ready
-    if (result.isEmpty || !result.contains(displayArea) || !result.contains(displayCrop)) {
-      // Defer state update to next frame to avoid build-time errors
+    if (result.isEmpty ||
+        !result.contains(displayArea) ||
+        !result.contains(displayCrop)) {
       Future.microtask(() {
-        if (mounted) calculateFertilizer(overrideCrop: displayCrop, overrideArea: displayArea);
+        if (mounted) {
+          calculateFertilizer(
+              overrideCrop: displayCrop, overrideArea: displayArea);
+        }
       });
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Fertilizer Calculator"),
+        title: Text(context.loc('fertilizer_calculator')),
         actions: [
           if (voiceFlow.activeFlow == VoiceFlow.fertilizer)
-            IconButton(onPressed: () => voiceFlow.stopFlow(), icon: const Icon(Icons.stop_circle, color: Colors.red))
+            IconButton(
+                onPressed: () => voiceFlow.stopFlow(),
+                icon: const Icon(Icons.stop_circle, color: Colors.red))
         ],
       ),
       body: SingleChildScrollView(
@@ -160,12 +174,19 @@ MOP: ${mop.toStringAsFixed(1)} kg
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.green.shade200)),
+                decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.green.shade200)),
                 child: Row(
                   children: [
                     const Icon(Icons.mic, color: Colors.green),
                     const SizedBox(width: 10),
-                    Expanded(child: Text(voiceFlow.lastGuidance, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green))),
+                    Expanded(
+                        child: Text(voiceFlow.lastGuidance,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green))),
                   ],
                 ),
               ),
@@ -174,14 +195,14 @@ MOP: ${mop.toStringAsFixed(1)} kg
             DropdownButtonFormField<String>(
               initialValue: displayCrop,
               items: ["Wheat", "Rice", "Potato", "Tomato"]
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .map((e) => DropdownMenuItem(value: e, child: Text(context.loc(e.toLowerCase()))))
                   .toList(),
               onChanged: (val) {
                 setState(() => crop = val!);
                 calculateFertilizer();
               },
-              decoration: const InputDecoration(
-                  labelText: "Select Crop", border: OutlineInputBorder()),
+              decoration: InputDecoration(
+                  labelText: context.loc('select_crop'), border: const OutlineInputBorder()),
             ),
             const SizedBox(height: 20),
 
@@ -191,13 +212,14 @@ MOP: ${mop.toStringAsFixed(1)} kg
                   child: DropdownButtonFormField<String>(
                     initialValue: soil,
                     items: ["Alluvial", "Black", "Sandy"]
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .map((e) => DropdownMenuItem(value: e, child: Text(context.loc(e.toLowerCase()))))
                         .toList(),
                     onChanged: (val) {
                       setState(() => soil = val!);
                       calculateFertilizer();
                     },
-                    decoration: const InputDecoration(labelText: "Soil Type", border: OutlineInputBorder()),
+                    decoration: InputDecoration(
+                        labelText: context.loc('soil_type'), border: const OutlineInputBorder()),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -205,13 +227,14 @@ MOP: ${mop.toStringAsFixed(1)} kg
                   child: DropdownButtonFormField<String>(
                     initialValue: weather,
                     items: ["Normal", "Dry", "Rainy"]
-                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .map((e) => DropdownMenuItem(value: e, child: Text(context.loc(e.toLowerCase()))))
                         .toList(),
                     onChanged: (val) {
                       setState(() => weather = val!);
                       calculateFertilizer();
                     },
-                    decoration: const InputDecoration(labelText: "Weather", border: OutlineInputBorder()),
+                    decoration: InputDecoration(
+                        labelText: context.loc('weather'), border: const OutlineInputBorder()),
                   ),
                 ),
               ],
@@ -221,28 +244,41 @@ MOP: ${mop.toStringAsFixed(1)} kg
             TextField(
               controller: areaController,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Land Area (in acres)", border: OutlineInputBorder(), prefixIcon: Icon(Icons.landscape)),
+              decoration: InputDecoration(
+                  labelText: context.loc('land_area'),
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.landscape)),
               onSubmitted: (_) => calculateFertilizer(),
             ),
             const SizedBox(height: 30),
 
             if (result.isNotEmpty) ...[
-              const Text("Calculation Result", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text(context.loc('calculation_result'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.green.shade100)),
-                child: Text(result, style: const TextStyle(fontSize: 16, height: 1.5)),
+                decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.green.shade100)),
+                child: Text(result,
+                    style: const TextStyle(fontSize: 16, height: 1.5)),
               ),
               const SizedBox(height: 20),
-              const Text("📝 Verified Agri Advice", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text("📝 ${context.loc('verified_agri_advice')}",
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.blue.shade100)),
-                child: Text(verifiedAdvice, style: const TextStyle(fontSize: 14, color: Colors.blue)),
+                decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade100)),
+                child: Text(verifiedAdvice,
+                    style: const TextStyle(fontSize: 14, color: Colors.blue)),
               ),
             ],
           ],

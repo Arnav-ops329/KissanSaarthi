@@ -1,0 +1,4 @@
+Analyzing kissansaarthi...                                      
+
+  error - Undefined name '_initError' - lib\Services\yolo_offline_service.dart:33:7 - undefined_identifier
+

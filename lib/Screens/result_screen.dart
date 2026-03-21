@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../localization/app_localizations.dart';
 
 class ResultScreen extends StatefulWidget {
   const ResultScreen({super.key});
@@ -52,7 +53,7 @@ class _ResultScreenState extends State<ResultScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Detection Result"),
+        title: Text(context.loc('diagnosis_result')),
         backgroundColor: Colors.green,
       ),
       body: isLoading
@@ -61,10 +62,10 @@ class _ResultScreenState extends State<ResultScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  buildInfoCard("Crop", crop, Icons.eco),
-                  buildInfoCard("Disease", disease, Icons.bug_report),
-                  buildInfoCard("Confidence", "$confidence%", Icons.analytics),
-                  buildInfoCard("Solution", solution, Icons.healing),
+                  buildInfoCard(context.loc('selected_crop'), crop, Icons.eco),
+                  buildInfoCard(context.loc('detected_disease'), disease, Icons.bug_report),
+                  buildInfoCard(context.loc('ai_confidence'), "$confidence%", Icons.analytics),
+                  buildInfoCard(context.loc('ai_agronomist_advice'), solution, Icons.healing),
                 ],
               ),
             ),

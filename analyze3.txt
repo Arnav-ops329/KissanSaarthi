@@ -1,0 +1,4 @@
+Analyzing kissansaarthi...                                      
+
+warning - The stack trace variable 'stack' isn't used and can be removed - lib\Services\yolo_offline_service.dart:32:17 - unused_catch_stack
+

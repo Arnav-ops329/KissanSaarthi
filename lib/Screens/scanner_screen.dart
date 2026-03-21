@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import '../localization/app_localizations.dart';
 
 class ScannerScreen extends StatefulWidget {
   const ScannerScreen({super.key});
@@ -34,7 +35,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Live Crop Scanner")),
+      appBar: AppBar(title: Text(context.loc('scan_crop'))),
 
       body: CameraPreview(controller!),
 

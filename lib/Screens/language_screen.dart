@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/locale_provider.dart';
+import '../localization/app_localizations.dart';
 
 class LanguageScreen extends StatelessWidget {
   const LanguageScreen({super.key});
@@ -10,7 +11,7 @@ class LanguageScreen extends StatelessWidget {
     final localeProvider = Provider.of<LocaleProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Select Language")),
+      appBar: AppBar(title: Text(context.loc('select_language'))),
       body: Column(
         children: [
           /// 🇬🇧 ENGLISH

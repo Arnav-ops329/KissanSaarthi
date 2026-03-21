@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'providers/app_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/voice_flow_provider.dart';
+import 'localization/app_localizations.dart';
 
 import 'screens/government_scheme_screen.dart';
 
@@ -65,6 +66,7 @@ class KissanSaarthiApp extends StatelessWidget {
         Locale('or'), // Odia
       ],
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
