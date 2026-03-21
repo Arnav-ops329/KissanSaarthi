@@ -88,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
         image: const DecorationImage(
-          image: AssetImage('assets/tractor.png'),
+          image: AssetImage('assets/Tractor2.png'),
           fit: BoxFit.cover,
         ),
       ),
@@ -139,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen>
                       const SizedBox(height: 6),
                       Text(context.loc('monitoring_health'),
                           style: const TextStyle(
-                              color: Colors.white70, 
+                              color: Colors.white70,
                               fontSize: 13,
                               fontWeight: FontWeight.w500)),
                     ],
@@ -186,8 +186,26 @@ class _HomeScreenState extends State<HomeScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(weather?['weather']?.split(' ').first ?? context.loc('partly_cloudy').split(' ').first, style: const TextStyle(color: Color(0xFF4A6849), fontSize: 13, fontWeight: FontWeight.bold)),
-                              Text(weather?['weather']?.split(' ').last ?? context.loc('partly_cloudy').split(' ').last, style: const TextStyle(color: Color(0xFF4A6849), fontSize: 13, fontWeight: FontWeight.bold)),
+                              Text(
+                                  weather?['weather']?.split(' ').first ??
+                                      context
+                                          .loc('partly_cloudy')
+                                          .split(' ')
+                                          .first,
+                                  style: const TextStyle(
+                                      color: Color(0xFF4A6849),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold)),
+                              Text(
+                                  weather?['weather']?.split(' ').last ??
+                                      context
+                                          .loc('partly_cloudy')
+                                          .split(' ')
+                                          .last,
+                                  style: const TextStyle(
+                                      color: Color(0xFF4A6849),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -195,8 +213,16 @@ class _HomeScreenState extends State<HomeScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(context.loc('humidity'), style: const TextStyle(color: Color(0xFF4A6849), fontSize: 13, fontWeight: FontWeight.w500)),
-                              Text("${weather?['humidity'] ?? 64}%", style: const TextStyle(color: Color(0xFF4A6849), fontSize: 13, fontWeight: FontWeight.bold)),
+                              Text(context.loc('humidity'),
+                                  style: const TextStyle(
+                                      color: Color(0xFF4A6849),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500)),
+                              Text("${weather?['humidity'] ?? 64}%",
+                                  style: const TextStyle(
+                                      color: Color(0xFF4A6849),
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ),
@@ -225,7 +251,10 @@ class _HomeScreenState extends State<HomeScreen>
           Text(
             context.loc('weather_note_home'),
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1E5624)),
+            style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1E5624)),
           ),
         ],
       ),
@@ -304,8 +333,7 @@ class _HomeScreenState extends State<HomeScreen>
                   padding: const EdgeInsets.only(right: 30),
                   child: Text(subtitle,
                       style: TextStyle(
-                          fontSize: 14,
-                          color: textColor.withAlpha(200))),
+                          fontSize: 14, color: textColor.withAlpha(200))),
                 ),
               ],
             ),
@@ -355,8 +383,8 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _smallFeatureRow(
-      String title, String subtitle, IconData icon, Color iconColor, Color iconBgColor, String route) {
+  Widget _smallFeatureRow(String title, String subtitle, IconData icon,
+      Color iconColor, Color iconBgColor, String route) {
     return InkWell(
       onTap: () => Navigator.pushNamed(context, route),
       child: Container(
@@ -381,11 +409,12 @@ class _HomeScreenState extends State<HomeScreen>
                   Text(title,
                       style: const TextStyle(
                           color: Color(0xFF1E5624),
-                          fontWeight: FontWeight.w900, 
+                          fontWeight: FontWeight.w900,
                           fontSize: 16)),
-                  const SizedBox(height: 4),    
+                  const SizedBox(height: 4),
                   Text(subtitle,
-                      style: const TextStyle(color: Color(0xFF4A6849), fontSize: 13)),
+                      style: const TextStyle(
+                          color: Color(0xFF4A6849), fontSize: 13)),
                 ],
               ),
             ),

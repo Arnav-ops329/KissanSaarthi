@@ -19,7 +19,11 @@ class VoiceCommandService {
       "forecast",
       "temperature",
       "ba بارش",
-      "bijli"
+      "bijli",
+      "climate",
+      "rain",
+      "sun",
+      "cloud"
     ])) {
       return {
         "route": "/weather",
@@ -28,7 +32,7 @@ class VoiceCommandService {
       };
     }
 
-    // 🎙️ 2. Real-Time Scan (New /scanner route)
+    // 🎙️ 2. Real-Time Scan
     if (_matches(text, [
       "scan",
       "scanner",
@@ -37,7 +41,9 @@ class VoiceCommandService {
       "bimari",
       "pest",
       "detect",
-      "identify"
+      "identify",
+      "disease",
+      "photo"
     ])) {
       return {
         "route": "/scanner",
@@ -47,19 +53,21 @@ class VoiceCommandService {
     }
 
     // 🎙️ 3. Static Upload / Gallery
-    if (_matches(text, ["upload", "gallery", "photo", "choose"])) {
+    if (_matches(text, [
+       "upload", "gallery", "choose", "picture", "image", "file"
+    ])) {
       return {
         "route": "/upload",
         "response": "Opening image upload.",
-        "flow": "cropScan", // Reuses same guided instructions
+        "flow": "cropScan",
       };
     }
 
     // 🎙️ 4. Mandi Prices
     if (_matches(
-        text, ["mandi", "price", "market", "daam", "bhav", "rates"])) {
+        text, ["mandi", "price", "market", "daam", "bhav", "rates", "sell", "buy", "cost"])) {
       String? found;
-      final crops = ["wheat", "rice", "potato", "tomato", "cotton"];
+      final crops = ["wheat", "rice", "potato", "tomato", "cotton", "corn", "soybean"];
       for (var c in crops) {
         if (text.contains(c)) {
           found = c;
@@ -83,7 +91,10 @@ class VoiceCommandService {
       "calculate",
       "calculation",
       "urea",
-      "dap"
+      "dap",
+      "nutrition",
+      "npk",
+      "compost"
     ])) {
       return {
         "route": "/fertilizer",
@@ -94,8 +105,7 @@ class VoiceCommandService {
 
     // 🎙️ 6. Crop Suggestion / Recommendation
     if (_matches(
-        text, ["crop", "recommend", "suggest", "advice", "fasal"])) {
-      // Note: "scan crop" is handled by higher priority rule #2
+        text, ["crop", "recommend", "suggest", "advice", "fasal", "grow", "plant", "season", "soil"])) {
       return {
         "route": "/crop_recommend",
         "response": "Opening crop recommendations.",
@@ -104,28 +114,45 @@ class VoiceCommandService {
     }
 
     // 🎙️ 7. Government Schemes
-    if (_matches(text, ["scheme", "yojana", "government", "sarkar"])) {
+    if (_matches(text, ["scheme", "yojana", "government", "sarkar", "subsidy", "loan"])) {
       return {
         "route": "/schemes",
         "response": "Opening government schemes.",
       };
     }
 
-    // 🎙️ 8. Wake Word Fallback: "Hey Kisan" (for general AI conversation)
-    final wakeWords = [
+    // 🎙️ 8. Language Screen
+    if (_matches(text, ["language", "bhasha", "english", "hindi", "marathi", "tamil", "bengali", "translate", "change"])) {
+      return {
+        "route": "/language",
+        "response": "Opening language settings.",
+      };
+    }
+
+    // 🎙️ 9. Home Screen
+    if (_matches(text, ["home", "dashboard", "main", "back", "shuru", "start", "menu"])) {
+      return {
+        "route": "/home",
+        "response": "Going to home screen.",
+      };
+    }
+
+    // 🎙️ 10. Wake Word / AI Chat
+    if (_matches(text, [
+      "chat",
+      "ai",
+      "bot",
+      "assistant",
+      "talk",
+      "ask",
+      "question",
+      "help",
       "hey kisan",
       "hey kishan",
-      "hey kissan",
       "hi kisan",
-      "hey kisan ji",
-      "hey kisaan",
-      "kisan kisan",
-      "kissan kissan",
-      "digital agronomist"
-    ];
-
-    bool hasWakeWord = wakeWords.any((word) => text.contains(word));
-    if (hasWakeWord) {
+      "digital agronomist",
+      "sahayak"
+    ])) {
       return {
         "route": "/chat",
         "response": "I am here to help you. Opening AI Assistant.",
@@ -135,7 +162,7 @@ class VoiceCommandService {
     return {
       "route": "",
       "response":
-          "Sorry, I did not understand. Try saying 'Mandi price' or 'Scan crop'.",
+          "Sorry, I did not understand. Try saying 'Mandi price', 'Scan crop', or 'Open weather'.",
     };
   }
 }

@@ -77,6 +77,13 @@ class _GlobalVoiceButtonState extends State<GlobalVoiceButton> {
 
                 Navigator.pushNamed(context, route);
                 if (widget.onCommandProcessed != null) widget.onCommandProcessed!();
+              } else if (result.finalResult) {
+                // Unrecognized command at the end of speaking
+                _speech.stop();
+                setState(() => isListening = false);
+                final String response = action["response"] ?? "Sorry, I didn't catch that.";
+                await voiceFlow.speak(response);
+                if (widget.onCommandProcessed != null) widget.onCommandProcessed!();
               }
             }
           },

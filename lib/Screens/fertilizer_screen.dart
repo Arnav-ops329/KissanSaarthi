@@ -195,14 +195,16 @@ MOP: ${mop.toStringAsFixed(1)} kg
             DropdownButtonFormField<String>(
               initialValue: displayCrop,
               items: ["Wheat", "Rice", "Potato", "Tomato"]
-                  .map((e) => DropdownMenuItem(value: e, child: Text(context.loc(e.toLowerCase()))))
+                  .map((e) => DropdownMenuItem(
+                      value: e, child: Text(context.loc(e.toLowerCase()))))
                   .toList(),
               onChanged: (val) {
                 setState(() => crop = val!);
                 calculateFertilizer();
               },
               decoration: InputDecoration(
-                  labelText: context.loc('select_crop'), border: const OutlineInputBorder()),
+                  labelText: context.loc('select_crop'),
+                  border: const OutlineInputBorder()),
             ),
             const SizedBox(height: 20),
 
@@ -212,14 +214,17 @@ MOP: ${mop.toStringAsFixed(1)} kg
                   child: DropdownButtonFormField<String>(
                     initialValue: soil,
                     items: ["Alluvial", "Black", "Sandy"]
-                        .map((e) => DropdownMenuItem(value: e, child: Text(context.loc(e.toLowerCase()))))
+                        .map((e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(context.loc(e.toLowerCase()))))
                         .toList(),
                     onChanged: (val) {
                       setState(() => soil = val!);
                       calculateFertilizer();
                     },
                     decoration: InputDecoration(
-                        labelText: context.loc('soil_type'), border: const OutlineInputBorder()),
+                        labelText: context.loc('soil_type'),
+                        border: const OutlineInputBorder()),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -227,14 +232,17 @@ MOP: ${mop.toStringAsFixed(1)} kg
                   child: DropdownButtonFormField<String>(
                     initialValue: weather,
                     items: ["Normal", "Dry", "Rainy"]
-                        .map((e) => DropdownMenuItem(value: e, child: Text(context.loc(e.toLowerCase()))))
+                        .map((e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(context.loc(e.toLowerCase()))))
                         .toList(),
                     onChanged: (val) {
                       setState(() => weather = val!);
                       calculateFertilizer();
                     },
                     decoration: InputDecoration(
-                        labelText: context.loc('weather'), border: const OutlineInputBorder()),
+                        labelText: context.loc('weather'),
+                        border: const OutlineInputBorder()),
                   ),
                 ),
               ],
@@ -254,7 +262,8 @@ MOP: ${mop.toStringAsFixed(1)} kg
 
             if (result.isNotEmpty) ...[
               Text(context.loc('calculation_result'),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,
@@ -268,7 +277,8 @@ MOP: ${mop.toStringAsFixed(1)} kg
               ),
               const SizedBox(height: 20),
               Text("📝 ${context.loc('verified_agri_advice')}",
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 12),
               Container(
                 width: double.infinity,

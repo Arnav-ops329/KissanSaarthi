@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../widgets/translated_text.dart';
 
 class GovernmentSchemesScreen extends StatefulWidget {
@@ -27,25 +28,39 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
       "desc":
           "Farmers receive ₹6000 per year in 3 installments directly in bank account.",
       "state": "All",
+      "link": "https://pmkisan.gov.in/"
     },
     {
       "name": "Soil Health Card",
       "desc":
           "Provides soil nutrient status and recommendations for fertilizers.",
       "state": "All",
+      "link": "https://soilhealth.dac.gov.in/"
     },
     {
       "name": "UP Krishi Yojana",
       "desc":
           "Subsidy for seeds and irrigation support for farmers in Uttar Pradesh.",
       "state": "Uttar Pradesh",
+      "link": "http://upagriculture.com/"
     },
     {
       "name": "Punjab Crop Insurance",
       "desc": "Insurance scheme to protect farmers against crop loss.",
       "state": "Punjab",
+      "link": "https://pmfby.gov.in/"
     },
   ];
+
+  Future<void> _launchURL(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Could not open link.")));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,29 +113,46 @@ class _GovernmentSchemesScreenState extends State<GovernmentSchemesScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /// 🌾 NAME
-                        TranslatedText(
-                          text: scheme["name"]!,
-                          langCode: lang,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(14),
+                    onTap: () => _launchURL(scheme["link"]!),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: TranslatedText(
+                                  text: scheme["name"]!,
+                                  langCode: lang,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const Icon(Icons.open_in_new, color: Colors.blueGrey, size: 20),
+                            ],
                           ),
-                        ),
-
-                        const SizedBox(height: 6),
-
-                        /// 📄 DESCRIPTION
-                        TranslatedText(
-                          text: scheme["desc"]!,
-                          langCode: lang,
-                        ),
-                      ],
+                          const SizedBox(height: 6),
+                          /// 📄 DESCRIPTION
+                          TranslatedText(
+                            text: scheme["desc"]!,
+                            langCode: lang,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            scheme["link"]!,
+                            style: const TextStyle(
+                                color: Colors.blue,
+                                decoration: TextDecoration.underline,
+                                fontSize: 13),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
